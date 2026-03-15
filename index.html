@@ -9,22 +9,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   NEXDOOR DESKTOP BRIDGE
-   Intercepts localStorage and redirects to real JSON files
-   on disk via Electron IPC. Falls back gracefully in browser.
-═══════════════════════════════════════════════════════════ */
+
 (function(){
   if (typeof window === 'undefined' || !window.electronAPI) return;
 
   const _nativeGet = Storage.prototype.getItem.bind(localStorage);
   const _nativeSet = Storage.prototype.setItem.bind(localStorage);
 
-  // Seed localStorage with data loaded from disk by preload script
   const seed = window.__NEXDOOR_DATA__ || {};
   Object.entries(seed).forEach(([k,v]) => _nativeSet(k, v));
 
-  // Intercept setItem → persist async to disk
   Storage.prototype.setItem = function(key, value) {
     _nativeSet(key, value);
     window.electronAPI.saveKey(key, value);
